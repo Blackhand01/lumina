@@ -217,3 +217,15 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 docs
+
+# Modelli (Mai caricare i pesi su Git)
+models/
+*.safetensors
+*.index.json
+
+# Log grezzi (Meglio tenere solo i report finali)
+logs/baseline/*.jsonl
+logs/baseline/*.txt
+
+# Artefatti di sistema Mac
+.DS_Store

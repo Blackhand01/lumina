@@ -95,6 +95,61 @@
     },
     "notes": {
       "type": "string"
+    },
+    "prompt_label": {
+      "type": "string",
+      "description": "Controlled prompt bucket, for example short, medium, or long."
+    },
+    "repeat_index": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "target_prompt_tokens": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "total_time_sec": {
+      "type": "number",
+      "minimum": 0
+    },
+    "start_swap_mb": {
+      "type": "number",
+      "minimum": 0
+    },
+    "end_swap_mb": {
+      "type": "number",
+      "minimum": 0
+    },
+    "swap_delta_mb": {
+      "type": "number"
+    },
+    "memory_pressure_start": {
+      "type": "string",
+      "enum": ["green", "yellow", "red", "unknown"]
+    },
+    "memory_pressure_end": {
+      "type": "string",
+      "enum": ["green", "yellow", "red", "unknown"]
+    },
+    "memory_pressure_free_percent_start": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "memory_pressure_free_percent_end": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "compressed_memory_start_mb": {
+      "type": "number",
+      "minimum": 0
+    },
+    "compressed_memory_end_mb": {
+      "type": "number",
+      "minimum": 0
+    },
+    "thermal_throttling": {
+      "type": "string",
+      "enum": ["observed", "not_observed", "unknown"]
     }
   }
 }

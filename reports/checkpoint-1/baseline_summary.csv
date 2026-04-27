@@ -1,0 +1,4 @@
+prompt_label,runs,avg_prompt_tokens,avg_generated_tokens,avg_tokens_per_second,avg_latency_ms_per_token,avg_peak_memory_mb,max_peak_memory_mb,max_swap_mb,max_swap_delta_mb,worst_memory_pressure,source_files
+short,3,409.000,129.000,41.826,24.426,160.340,293.670,0.000,0.000,green,logs/baseline/run_llama32_1b.jsonl
+medium,3,1561.000,129.000,26.229,38.176,82.193,98.300,0.000,0.000,green,logs/baseline/run_llama32_1b.jsonl
+long,3,3097.000,129.000,17.237,58.023,87.640,88.020,0.000,0.000,green,logs/baseline/run_llama32_1b.jsonl

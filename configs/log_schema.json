@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lumina.local/schemas/experiment-log.schema.json",
+  "title": "Lumina Experiment Log",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "run_id",
+    "timestamp",
+    "model",
+    "backend",
+    "quantization",
+    "prompt_tokens",
+    "generated_tokens",
+    "cache_policy",
+    "peak_memory_mb",
+    "swap_mb",
+    "memory_pressure",
+    "compressed_memory_mb",
+    "latency_ms_per_token",
+    "tokens_per_second",
+    "benchmark",
+    "score",
+    "notes"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable identifier for a single experiment run."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Run start time in ISO 8601 format."
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1
+    },
+    "backend": {
+      "type": "string",
+      "minLength": 1,
+      "examples": ["mlx", "llama.cpp", "transformers"]
+    },
+    "quantization": {
+      "type": "string",
+      "minLength": 1,
+      "examples": ["none", "q4", "q5", "q8"]
+    },
+    "prompt_tokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "generated_tokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cache_policy": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Policy used for KV cache, prompt cache, disk cache, or model cache."
+    },
+    "peak_memory_mb": {
+      "type": "number",
+      "minimum": 0
+    },
+    "swap_mb": {
+      "type": "number",
+      "minimum": 0
+    },
+    "memory_pressure": {
+      "type": "string",
+      "enum": ["green", "yellow", "red", "unknown"]
+    },
+    "compressed_memory_mb": {
+      "type": "number",
+      "minimum": 0
+    },
+    "latency_ms_per_token": {
+      "type": "number",
+      "minimum": 0
+    },
+    "tokens_per_second": {
+      "type": "number",
+      "minimum": 0
+    },
+    "benchmark": {
+      "type": "string",
+      "minLength": 1
+    },
+    "score": {
+      "type": ["number", "string", "null"],
+      "description": "Numeric score when available, otherwise a textual result or null."
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

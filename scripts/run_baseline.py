@@ -8,14 +8,15 @@ import datetime as dt
 import importlib.metadata as metadata
 import json
 import os
-import re
-import subprocess
 import sys
-import threading
 import time
 import uuid
 from pathlib import Path
 from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from src.telemetry import MemorySampler, snapshot, worst_pressure
 
 
 PROMPT_BASE = (
@@ -26,107 +27,6 @@ PROMPT_BASE = (
 )
 
 PROMPT_LABELS = ["short", "medium", "long"]
-PRESSURE_RANK = {"unknown": 0, "green": 1, "yellow": 2, "red": 3}
-
-
-def run_text(command: list[str], timeout: int = 20) -> str:
-    try:
-        completed = subprocess.run(
-            command,
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-        )
-    except (OSError, subprocess.TimeoutExpired):
-        return ""
-    return (completed.stdout or "") + (completed.stderr or "")
-
-
-def parse_size_to_mb(value: str, unit: str) -> float:
-    number = float(value)
-    unit = unit.upper()
-    if unit.startswith("G"):
-        return number * 1024
-    if unit.startswith("K"):
-        return number / 1024
-    return number
-
-
-def swap_used_mb() -> float:
-    text = run_text(["sysctl", "vm.swapusage"])
-    match = re.search(r"used\s*=\s*([0-9.]+)([KMG])", text)
-    if not match:
-        return 0.0
-    return parse_size_to_mb(match.group(1), match.group(2))
-
-
-def physmem_compressor_mb() -> float:
-    text = run_text(["top", "-l", "1"], timeout=30)
-    for line in text.splitlines():
-        if "PhysMem:" not in line:
-            continue
-        match = re.search(r"([0-9.]+)([KMG])\s+compressor", line)
-        if match:
-            return parse_size_to_mb(match.group(1), match.group(2))
-    return 0.0
-
-
-def memory_pressure() -> tuple[str, float | None]:
-    text = run_text(["memory_pressure"], timeout=30)
-    match = re.search(r"System-wide memory free percentage:\s*([0-9.]+)%", text)
-    if not match:
-        return "unknown", None
-
-    free_percent = float(match.group(1))
-    if free_percent >= 20:
-        return "green", free_percent
-    if free_percent >= 10:
-        return "yellow", free_percent
-    return "red", free_percent
-
-
-def worst_pressure(left: str, right: str) -> str:
-    return left if PRESSURE_RANK[left] >= PRESSURE_RANK[right] else right
-
-
-def rss_mb(pid: int) -> float:
-    text = run_text(["ps", "-o", "rss=", "-p", str(pid)], timeout=5).strip()
-    if not text:
-        return 0.0
-    return float(text.splitlines()[0].strip()) / 1024
-
-
-class MemorySampler:
-    def __init__(self, pid: int, interval_seconds: float = 0.25) -> None:
-        self.pid = pid
-        self.interval_seconds = interval_seconds
-        self._stop = threading.Event()
-        self.samples_mb: list[float] = []
-        self._thread = threading.Thread(target=self._sample, daemon=True)
-
-    def __enter__(self) -> "MemorySampler":
-        self._thread.start()
-        return self
-
-    def __exit__(self, *_: object) -> None:
-        self._stop.set()
-        self._thread.join(timeout=2)
-
-    def _sample(self) -> None:
-        while not self._stop.is_set():
-            value = rss_mb(self.pid)
-            if value > 0:
-                self.samples_mb.append(value)
-            self._stop.wait(self.interval_seconds)
-
-    @property
-    def peak_mb(self) -> float:
-        if not self.samples_mb:
-            return rss_mb(self.pid)
-        return max(self.samples_mb)
-
-
 def tokenizer_count(tokenizer: Any, text: str) -> int:
     return len(tokenizer.encode(text))
 
@@ -199,23 +99,24 @@ def make_record(
     generated_tokens: int,
     elapsed_seconds: float,
     peak_memory_mb: float,
-    start_swap_mb: float,
-    end_swap_mb: float,
-    start_pressure: str,
-    end_pressure: str,
-    start_pressure_free_percent: float | None,
-    end_pressure_free_percent: float | None,
-    start_compressed_mb: float,
-    end_compressed_mb: float,
+    start_memory: Any,
+    end_memory: Any,
+    peak_unified_used_mb: float,
+    peak_swap_used_mb: float,
+    peak_compressor_mb: float,
 ) -> dict[str, Any]:
     tokens_per_second = generated_tokens / elapsed_seconds if elapsed_seconds > 0 else 0.0
     latency_ms_per_token = (
         elapsed_seconds * 1000 / generated_tokens if generated_tokens > 0 else 0.0
     )
-    pressure = worst_pressure(start_pressure, end_pressure)
-    swap_delta = end_swap_mb - start_swap_mb
+    pressure = worst_pressure(start_memory.pressure, end_memory.pressure)
+    swap_delta = end_memory.swap_used_mb - start_memory.swap_used_mb
+    unified_delta = end_memory.unified_used_mb - start_memory.unified_used_mb
+    compressed_delta = end_memory.compressed_mb - start_memory.compressed_mb
+    pageout_delta = end_memory.pageouts - start_memory.pageouts
+    swapout_delta = end_memory.swapouts - start_memory.swapouts
 
-    return {
+    record = {
         "run_id": f"baseline-{prompt_label}-{repeat_index}-{uuid.uuid4().hex[:8]}",
         "timestamp": dt.datetime.now(dt.timezone.utc).isoformat(),
         "model": model_name,
@@ -225,9 +126,9 @@ def make_record(
         "generated_tokens": generated_tokens,
         "cache_policy": "full_kv_cache",
         "peak_memory_mb": round(peak_memory_mb, 2),
-        "swap_mb": round(end_swap_mb, 2),
+        "swap_mb": round(end_memory.swap_used_mb, 2),
         "memory_pressure": pressure,
-        "compressed_memory_mb": round(end_compressed_mb, 2),
+        "compressed_memory_mb": round(end_memory.compressed_mb, 2),
         "latency_ms_per_token": round(latency_ms_per_token, 3),
         "tokens_per_second": round(tokens_per_second, 3),
         "benchmark": "baseline",
@@ -235,23 +136,44 @@ def make_record(
         "notes": (
             f"prompt_label={prompt_label}; repeat={repeat_index}; "
             f"total_time_sec={elapsed_seconds:.3f}; swap_delta_mb={swap_delta:.2f}; "
+            f"unified_delta_mb={unified_delta:.2f}; "
             "thermal_throttling=unknown"
         ),
         "prompt_label": prompt_label,
         "repeat_index": repeat_index,
         "target_prompt_tokens": target_prompt_tokens,
         "total_time_sec": round(elapsed_seconds, 3),
-        "start_swap_mb": round(start_swap_mb, 2),
-        "end_swap_mb": round(end_swap_mb, 2),
+        "start_swap_mb": round(start_memory.swap_used_mb, 2),
+        "end_swap_mb": round(end_memory.swap_used_mb, 2),
         "swap_delta_mb": round(swap_delta, 2),
-        "memory_pressure_start": start_pressure,
-        "memory_pressure_end": end_pressure,
-        "memory_pressure_free_percent_start": start_pressure_free_percent,
-        "memory_pressure_free_percent_end": end_pressure_free_percent,
-        "compressed_memory_start_mb": round(start_compressed_mb, 2),
-        "compressed_memory_end_mb": round(end_compressed_mb, 2),
+        "memory_pressure_start": start_memory.pressure,
+        "memory_pressure_end": end_memory.pressure,
+        "memory_pressure_free_percent_start": start_memory.pressure_free_percent,
+        "memory_pressure_free_percent_end": end_memory.pressure_free_percent,
+        "compressed_memory_start_mb": round(start_memory.compressed_mb, 2),
+        "compressed_memory_end_mb": round(end_memory.compressed_mb, 2),
         "thermal_throttling": "unknown",
+        "telemetry_source": "vm_stat+memory_pressure+sysctl",
+        "start_unified_used_mb": round(start_memory.unified_used_mb, 2),
+        "end_unified_used_mb": round(end_memory.unified_used_mb, 2),
+        "unified_delta_mb": round(unified_delta, 2),
+        "peak_unified_used_mb": round(peak_unified_used_mb, 2),
+        "start_unified_available_mb": round(start_memory.unified_available_mb, 2),
+        "end_unified_available_mb": round(end_memory.unified_available_mb, 2),
+        "start_process_rss_mb": round(start_memory.process_rss_mb, 2),
+        "end_process_rss_mb": round(end_memory.process_rss_mb, 2),
+        "peak_process_rss_mb": round(peak_memory_mb, 2),
+        "peak_swap_mb": round(peak_swap_used_mb, 2),
+        "start_compressor_mb": round(start_memory.compressor_mb, 2),
+        "end_compressor_mb": round(end_memory.compressor_mb, 2),
+        "peak_compressor_mb": round(peak_compressor_mb, 2),
+        "compressed_memory_delta_mb": round(compressed_delta, 2),
+        "pageout_delta": round(pageout_delta, 2),
+        "swapout_delta": round(swapout_delta, 2),
     }
+    record.update(start_memory.to_record("telemetry_start"))
+    record.update(end_memory.to_record("telemetry_end"))
+    return record
 
 
 def run_baseline(args: argparse.Namespace) -> None:
@@ -277,9 +199,7 @@ def run_baseline(args: argparse.Namespace) -> None:
         for label, target_tokens in zip(PROMPT_LABELS, args.prompt_tokens):
             prompt, prompt_tokens = build_prompt(tokenizer, target_tokens)
             for repeat_index in range(1, args.runs + 1):
-                start_swap = swap_used_mb()
-                start_pressure, start_pressure_free = memory_pressure()
-                start_compressed = physmem_compressor_mb()
+                start_memory = snapshot(os.getpid())
 
                 start = time.perf_counter()
                 with MemorySampler(os.getpid()) as sampler:
@@ -293,9 +213,7 @@ def run_baseline(args: argparse.Namespace) -> None:
                 elapsed = time.perf_counter() - start
 
                 generated_tokens = tokenizer_count(tokenizer, generated)
-                end_swap = swap_used_mb()
-                end_pressure, end_pressure_free = memory_pressure()
-                end_compressed = physmem_compressor_mb()
+                end_memory = snapshot(os.getpid())
 
                 record = make_record(
                     model_name=args.model,
@@ -306,15 +224,12 @@ def run_baseline(args: argparse.Namespace) -> None:
                     prompt_tokens=prompt_tokens,
                     generated_tokens=generated_tokens,
                     elapsed_seconds=elapsed,
-                    peak_memory_mb=sampler.peak_mb,
-                    start_swap_mb=start_swap,
-                    end_swap_mb=end_swap,
-                    start_pressure=start_pressure,
-                    end_pressure=end_pressure,
-                    start_pressure_free_percent=start_pressure_free,
-                    end_pressure_free_percent=end_pressure_free,
-                    start_compressed_mb=start_compressed,
-                    end_compressed_mb=end_compressed,
+                    peak_memory_mb=sampler.peak_rss_mb,
+                    start_memory=start_memory,
+                    end_memory=end_memory,
+                    peak_unified_used_mb=sampler.peak_unified_used_mb,
+                    peak_swap_used_mb=sampler.peak_swap_used_mb,
+                    peak_compressor_mb=sampler.peak_compressor_mb,
                 )
 
                 handle.write(json.dumps(record, sort_keys=True) + "\n")

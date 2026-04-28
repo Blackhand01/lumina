@@ -229,3 +229,5 @@ logs/baseline/*.txt
 
 # Artefatti di sistema Mac
 .DS_Store
+
+*.npy

@@ -3,7 +3,7 @@
   "$id": "https://lumina.local/schemas/experiment-log.schema.json",
   "title": "Lumina Experiment Log",
   "type": "object",
-  "additionalProperties": false,
+  "additionalProperties": true,
   "required": [
     "run_id",
     "timestamp",
@@ -150,6 +150,57 @@
     "thermal_throttling": {
       "type": "string",
       "enum": ["observed", "not_observed", "unknown"]
+    },
+    "telemetry_source": {
+      "type": "string"
+    },
+    "start_unified_used_mb": {
+      "type": "number"
+    },
+    "end_unified_used_mb": {
+      "type": "number"
+    },
+    "unified_delta_mb": {
+      "type": "number"
+    },
+    "peak_unified_used_mb": {
+      "type": "number"
+    },
+    "start_unified_available_mb": {
+      "type": "number"
+    },
+    "end_unified_available_mb": {
+      "type": "number"
+    },
+    "start_process_rss_mb": {
+      "type": "number"
+    },
+    "end_process_rss_mb": {
+      "type": "number"
+    },
+    "peak_process_rss_mb": {
+      "type": "number"
+    },
+    "peak_swap_mb": {
+      "type": "number"
+    },
+    "start_compressor_mb": {
+      "type": "number"
+    },
+    "end_compressor_mb": {
+      "type": "number"
+    },
+    "peak_compressor_mb": {
+      "type": "number"
+    },
+    "compressed_memory_delta_mb": {
+      "type": "number"
+    },
+    "pageout_delta": {
+      "type": "number"
+    },
+    "swapout_delta": {
+      "type": "number"
     }
   }
 }

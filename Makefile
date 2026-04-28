@@ -17,8 +17,13 @@ OBS_MODEL ?= models/Llama-3.2-1B-4bit
 CACHE_SAMPLE_DIR ?= data/cache_samples
 FIGURES_DIR ?= reports/figures
 PCA_MAX_SAMPLES ?= 50000
+COMPRESSION_DIR ?= logs/compression
+COMPRESSION_LOG ?= $(COMPRESSION_DIR)/compression_$(shell date +%Y%m%d_%H%M%S).jsonl
+COMPRESSION_MAX_TOKENS ?= 64
+PCA_RANK ?= 35
+EVICTION_SIZE ?= 1024
 
-.PHONY: help checkpoint1 checkpoint1-prepare checkpoint1-deps checkpoint1-dirs checkpoint1-preflight checkpoint1-baseline checkpoint1-report checkpoint1-check checkpoint2 checkpoint2-prepare checkpoint2-deps checkpoint2-dirs checkpoint2-extract checkpoint2-analyze checkpoint2-check telemetry-check
+.PHONY: help checkpoint1 checkpoint1-prepare checkpoint1-deps checkpoint1-dirs checkpoint1-preflight checkpoint1-baseline checkpoint1-report checkpoint1-check checkpoint2 checkpoint2-prepare checkpoint2-deps checkpoint2-dirs checkpoint2-extract checkpoint2-analyze checkpoint2-check checkpoint3 checkpoint3-dirs checkpoint3-compare checkpoint3-check telemetry-check
 
 help:
 	@echo "Lumina checkpoint automation"
@@ -31,6 +36,8 @@ help:
 	@echo "  make telemetry-check      Print current vm_stat/memory_pressure telemetry snapshot"
 	@echo "  make checkpoint2          Extract KV cache and run offline PCA observatory"
 	@echo "  make checkpoint2-check    Validate Checkpoint 2 scripts without loading a model"
+	@echo "  make checkpoint3          Compare full, quantized, PCA, and eviction cache policies"
+	@echo "  make checkpoint3-check    Validate Checkpoint 3 without loading a model"
 	@echo ""
 	@echo "Config:"
 	@echo "  MODEL=$(MODEL)"
@@ -38,6 +45,7 @@ help:
 	@echo "  RUNS=$(RUNS)"
 	@echo "  MAX_TOKENS=$(MAX_TOKENS)"
 	@echo "  PROMPT_TOKENS=$(PROMPT_TOKENS)"
+	@echo "  COMPRESSION_MAX_TOKENS=$(COMPRESSION_MAX_TOKENS)"
 
 checkpoint1: checkpoint1-prepare checkpoint1-preflight checkpoint1-baseline checkpoint1-report
 	@echo "Checkpoint 1 complete. Report: reports/baseline_report.md"
@@ -133,3 +141,31 @@ checkpoint2-check: .venv/bin/python checkpoint2-dirs
 		--model "$(OBS_MODEL)" \
 		--prompt-tokens "$(PROMPT_TOKENS)" \
 		--output-root "$(CACHE_SAMPLE_DIR)"
+
+checkpoint3: checkpoint3-dirs
+	$(PYTHON) scripts/compare_compression.py \
+		--model "$(OBS_MODEL)" \
+		--prompt-tokens "$(PROMPT_TOKENS)" \
+		--max-tokens "$(COMPRESSION_MAX_TOKENS)" \
+		--samples-dir "$(CACHE_SAMPLE_DIR)" \
+		--pca-rank "$(PCA_RANK)" \
+		--eviction-size "$(EVICTION_SIZE)" \
+		--log "$(COMPRESSION_LOG)" \
+		--summary-csv reports/compression_summary.csv \
+		--tradeoff-svg reports/compression_tradeoff.svg \
+		--report reports/report-checkpoint-3.md
+
+checkpoint3-dirs:
+	@mkdir -p $(COMPRESSION_DIR) reports src/lumina/cache
+
+checkpoint3-check: .venv/bin/python checkpoint3-dirs
+	$(PYTHON) -m py_compile src/lumina/cache/policies.py scripts/compare_compression.py
+	$(PYTHON) scripts/compare_compression.py \
+		--dry-run \
+		--model "$(OBS_MODEL)" \
+		--prompt-tokens "$(PROMPT_TOKENS)" \
+		--max-tokens "$(COMPRESSION_MAX_TOKENS)" \
+		--samples-dir "$(CACHE_SAMPLE_DIR)" \
+		--pca-rank "$(PCA_RANK)" \
+		--eviction-size "$(EVICTION_SIZE)" \
+		--log "$(COMPRESSION_LOG)"

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="430" viewBox="0 0 760 430">
+  <rect width="100%" height="100%" fill="white" />
+  <text x="380.0" y="26" text-anchor="middle" font-size="18">Compression Trade-off</text>
+  <line x1="72" y1="48" x2="72" y2="362" stroke="#111827" />
+  <line x1="72" y1="362" x2="718" y2="362" stroke="#111827" />
+  <text x="380.0" y="414" text-anchor="middle" font-size="12">RAM saved (%)</text>
+  <text x="20" y="205.0" transform="rotate(-90 20,205.0)" text-anchor="middle" font-size="12">quality error</text>
+  <circle cx="72.0" cy="362.0" r="5" fill="#2563eb" />
+<text x="80.0" y="354.0" font-size="12">full</text>
+<circle cx="438.1" cy="194.9" r="5" fill="#2563eb" />
+<text x="446.1" y="186.9" font-size="12">eviction</text>
+<circle cx="718.0" cy="48.0" r="5" fill="#2563eb" />
+<text x="726.0" y="40.0" font-size="12">pca_35</text>
+<circle cx="696.7" cy="362.0" r="5" fill="#2563eb" />
+<text x="704.7" y="354.0" font-size="12">quantized_8bit</text>
+</svg>

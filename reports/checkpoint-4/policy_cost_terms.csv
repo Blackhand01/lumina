@@ -1,0 +1,43 @@
+run_id,target_regime,prompt_tokens,action_name,feasible,backend_status,reason,estimated_kv_cache_mb,memory_budget_mb,quality_loss,latency,memory_usage,swap_risk,bandwidth_pressure,total
+checkpoint4-under_saturated-3072-20260502214114,under_saturated,3072,full_16,True,real,fp16/bf16 KV path available,96.0,352.0,0.0,1.0,0.272727,0.0,0.010909,1.578182
+checkpoint4-under_saturated-3072-20260502214114,under_saturated,3072,full_8,True,real,backend path available,50.976,352.0,0.0,1.02,0.144818,0.0,0.005793,1.327015
+checkpoint4-under_saturated-3072-20260502214114,under_saturated,3072,r50_b16,True,real,fp16/bf16 KV path available,48.0,352.0,0.4375,0.95,0.136364,0.0,0.005455,2.989091
+checkpoint4-under_saturated-3072-20260502214114,under_saturated,3072,r75_b8,False,infeasible,RotatingKVCache quantization NYI,38.232,352.0,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-under_saturated-3072-20260502214114,under_saturated,3072,r50_b8,False,infeasible,RotatingKVCache quantization NYI,25.488,352.0,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-under_saturated-3072-20260502214114,under_saturated,3072,r50_b4,False,infeasible,kv_bits=4 not supported by backend,12.744,352.0,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-under_saturated-3072-20260502214114,under_saturated,3072,r30_b4,False,infeasible,kv_bits=4 not supported by backend,7.646,352.0,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-saturation-3072-20260502214114,saturation,3072,full_16,False,real,estimated KV 96.00 MB exceeds budget 49.44 MB,96.0,49.44,0.0,0.0,1.941748,0.0,0.0,inf
+checkpoint4-saturation-3072-20260502214114,saturation,3072,full_8,False,real,estimated KV 50.98 MB exceeds budget 49.44 MB,50.976,49.44,0.0,0.0,1.031068,0.0,0.0,inf
+checkpoint4-saturation-3072-20260502214114,saturation,3072,r50_b16,True,real,fp16/bf16 KV path available,48.0,49.44,0.4375,0.95,0.970874,1.495995,0.659312,15.825717
+checkpoint4-saturation-3072-20260502214114,saturation,3072,r75_b8,False,infeasible,RotatingKVCache quantization NYI,38.232,49.44,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-saturation-3072-20260502214114,saturation,3072,r50_b8,False,infeasible,RotatingKVCache quantization NYI,25.488,49.44,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-saturation-3072-20260502214114,saturation,3072,r50_b4,False,infeasible,kv_bits=4 not supported by backend,12.744,49.44,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-saturation-3072-20260502214114,saturation,3072,r30_b4,False,infeasible,kv_bits=4 not supported by backend,7.646,49.44,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-contention-3072-20260502214114,contention,3072,full_16,False,real,estimated KV 96.00 MB exceeds budget 49.44 MB,96.0,49.44,0.0,0.0,1.941748,0.0,0.0,inf
+checkpoint4-contention-3072-20260502214114,contention,3072,full_8,False,real,estimated KV 50.98 MB exceeds budget 49.44 MB,50.976,49.44,0.0,0.0,1.031068,0.0,0.0,inf
+checkpoint4-contention-3072-20260502214114,contention,3072,r50_b16,True,real,fp16/bf16 KV path available,48.0,49.44,0.4375,0.95,0.970874,1.738495,1.828691,26.787169
+checkpoint4-contention-3072-20260502214114,contention,3072,r75_b8,False,infeasible,RotatingKVCache quantization NYI,38.232,49.44,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-contention-3072-20260502214114,contention,3072,r50_b8,False,infeasible,RotatingKVCache quantization NYI,25.488,49.44,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-contention-3072-20260502214114,contention,3072,r50_b4,False,infeasible,kv_bits=4 not supported by backend,12.744,49.44,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-contention-3072-20260502214114,contention,3072,r30_b4,False,infeasible,kv_bits=4 not supported by backend,7.646,49.44,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-under_saturated-10000-20260502214114,under_saturated,10000,full_16,True,real,fp16/bf16 KV path available,312.5,625.0,0.0,1.0,0.5,0.0,0.02,2.06
+checkpoint4-under_saturated-10000-20260502214114,under_saturated,10000,full_8,True,real,backend path available,165.938,625.0,0.0,1.02,0.2655,0.0,0.01062,1.58286
+checkpoint4-under_saturated-10000-20260502214114,under_saturated,10000,r50_b16,True,real,fp16/bf16 KV path available,156.25,625.0,0.4375,0.95,0.25,0.0,0.01,3.23
+checkpoint4-under_saturated-10000-20260502214114,under_saturated,10000,r75_b8,False,infeasible,RotatingKVCache quantization NYI,124.453,625.0,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-under_saturated-10000-20260502214114,under_saturated,10000,r50_b8,False,infeasible,RotatingKVCache quantization NYI,82.969,625.0,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-under_saturated-10000-20260502214114,under_saturated,10000,r50_b4,False,infeasible,kv_bits=4 not supported by backend,41.484,625.0,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-under_saturated-10000-20260502214114,under_saturated,10000,r30_b4,False,infeasible,kv_bits=4 not supported by backend,24.891,625.0,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-saturation-10000-20260502214114,saturation,10000,full_16,False,real,estimated KV 312.50 MB exceeds budget 160.94 MB,312.5,160.9375,0.0,0.0,1.941748,0.0,0.0,inf
+checkpoint4-saturation-10000-20260502214114,saturation,10000,full_8,False,real,estimated KV 165.94 MB exceeds budget 160.94 MB,165.938,160.9375,0.0,0.0,1.031068,0.0,0.0,inf
+checkpoint4-saturation-10000-20260502214114,saturation,10000,r50_b16,True,real,fp16/bf16 KV path available,156.25,160.9375,0.4375,0.95,0.970874,1.495995,0.659312,15.825717
+checkpoint4-saturation-10000-20260502214114,saturation,10000,r75_b8,False,infeasible,RotatingKVCache quantization NYI,124.453,160.9375,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-saturation-10000-20260502214114,saturation,10000,r50_b8,False,infeasible,RotatingKVCache quantization NYI,82.969,160.9375,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-saturation-10000-20260502214114,saturation,10000,r50_b4,False,infeasible,kv_bits=4 not supported by backend,41.484,160.9375,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-saturation-10000-20260502214114,saturation,10000,r30_b4,False,infeasible,kv_bits=4 not supported by backend,24.891,160.9375,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-contention-10000-20260502214114,contention,10000,full_16,False,real,estimated KV 312.50 MB exceeds budget 160.94 MB,312.5,160.9375,0.0,0.0,1.941748,0.0,0.0,inf
+checkpoint4-contention-10000-20260502214114,contention,10000,full_8,False,real,estimated KV 165.94 MB exceeds budget 160.94 MB,165.938,160.9375,0.0,0.0,1.031068,0.0,0.0,inf
+checkpoint4-contention-10000-20260502214114,contention,10000,r50_b16,True,real,fp16/bf16 KV path available,156.25,160.9375,0.4375,0.95,0.970874,1.738495,1.828691,26.787169
+checkpoint4-contention-10000-20260502214114,contention,10000,r75_b8,False,infeasible,RotatingKVCache quantization NYI,124.453,160.9375,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-contention-10000-20260502214114,contention,10000,r50_b8,False,infeasible,RotatingKVCache quantization NYI,82.969,160.9375,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-contention-10000-20260502214114,contention,10000,r50_b4,False,infeasible,kv_bits=4 not supported by backend,41.484,160.9375,0.0,0.0,0.0,0.0,0.0,inf
+checkpoint4-contention-10000-20260502214114,contention,10000,r30_b4,False,infeasible,kv_bits=4 not supported by backend,24.891,160.9375,0.0,0.0,0.0,0.0,0.0,inf

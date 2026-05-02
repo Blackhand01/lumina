@@ -22,8 +22,12 @@ COMPRESSION_LOG ?= $(COMPRESSION_DIR)/compression_$(shell date +%Y%m%d_%H%M%S).j
 COMPRESSION_MAX_TOKENS ?= 64
 PCA_RANK ?= 35
 EVICTION_SIZE ?= 1024
+POLICY_DIR ?= logs/policy
+POLICY_LOG ?= $(POLICY_DIR)/policy_$(shell date +%Y%m%d_%H%M%S).jsonl
+POLICY_PROMPT_TOKENS ?= 3072,10000
+POLICY_MAX_TOKENS ?= 32
 
-.PHONY: help checkpoint1 checkpoint1-prepare checkpoint1-deps checkpoint1-dirs checkpoint1-preflight checkpoint1-baseline checkpoint1-report checkpoint1-check checkpoint2 checkpoint2-prepare checkpoint2-deps checkpoint2-dirs checkpoint2-extract checkpoint2-analyze checkpoint2-check checkpoint3 checkpoint3-dirs checkpoint3-compare checkpoint3-check telemetry-check
+.PHONY: help checkpoint1 checkpoint1-prepare checkpoint1-deps checkpoint1-dirs checkpoint1-preflight checkpoint1-baseline checkpoint1-report checkpoint1-check checkpoint2 checkpoint2-prepare checkpoint2-deps checkpoint2-dirs checkpoint2-extract checkpoint2-analyze checkpoint2-check checkpoint3 checkpoint3-dirs checkpoint3-compare checkpoint3-check checkpoint4 checkpoint4-dirs checkpoint4-controller checkpoint4-check telemetry-check
 
 help:
 	@echo "Lumina checkpoint automation"
@@ -38,6 +42,8 @@ help:
 	@echo "  make checkpoint2-check    Validate Checkpoint 2 scripts without loading a model"
 	@echo "  make checkpoint3          Compare full, quantized, PCA, and eviction cache policies"
 	@echo "  make checkpoint3-check    Validate Checkpoint 3 without loading a model"
+	@echo "  make checkpoint4          Run regime-aware policy controller and write report"
+	@echo "  make checkpoint4-check    Validate Checkpoint 4 without loading a model"
 	@echo ""
 	@echo "Config:"
 	@echo "  MODEL=$(MODEL)"
@@ -46,6 +52,7 @@ help:
 	@echo "  MAX_TOKENS=$(MAX_TOKENS)"
 	@echo "  PROMPT_TOKENS=$(PROMPT_TOKENS)"
 	@echo "  COMPRESSION_MAX_TOKENS=$(COMPRESSION_MAX_TOKENS)"
+	@echo "  POLICY_PROMPT_TOKENS=$(POLICY_PROMPT_TOKENS)"
 
 checkpoint1: checkpoint1-prepare checkpoint1-preflight checkpoint1-baseline checkpoint1-report
 	@echo "Checkpoint 1 complete. Report: reports/baseline_report.md"
@@ -169,3 +176,37 @@ checkpoint3-check: .venv/bin/python checkpoint3-dirs
 		--pca-rank "$(PCA_RANK)" \
 		--eviction-size "$(EVICTION_SIZE)" \
 		--log "$(COMPRESSION_LOG)"
+
+checkpoint4: checkpoint4-dirs checkpoint4-controller
+	@echo "Checkpoint 4 policy report: reports/report-checkpoint-4.md"
+
+checkpoint4-dirs:
+	@mkdir -p $(POLICY_DIR) reports/checkpoint-4 configs/policies configs/regimes src/lumina/policy
+
+checkpoint4-controller:
+	$(PYTHON) scripts/run_policy_experiment.py \
+		--model "$(OBS_MODEL)" \
+		--prompt-tokens "$(POLICY_PROMPT_TOKENS)" \
+		--log "$(POLICY_LOG)" \
+		--summary-csv reports/checkpoint-4/regime_action_summary.csv \
+		--cost-csv reports/checkpoint-4/policy_cost_terms.csv \
+		--pareto-csv reports/checkpoint-4/pareto_feasible_set.csv \
+		--frontier-svg reports/checkpoint-4/retention_precision_by_regime.svg \
+		--pareto-svg reports/checkpoint-4/pareto_feasible_set.svg \
+		--report reports/report-checkpoint-4.md
+
+checkpoint4-check: .venv/bin/python checkpoint4-dirs
+	$(PYTHON) -m py_compile \
+		src/lumina/policy/__init__.py \
+		src/lumina/policy/actions.py \
+		src/lumina/policy/regimes.py \
+		src/lumina/policy/cost.py \
+		src/lumina/policy/controller.py \
+		scripts/run_policy_experiment.py \
+		scripts/memory_pressure.py
+	$(PYTHON) scripts/run_policy_experiment.py \
+		--dry-run \
+		--model "$(OBS_MODEL)" \
+		--prompt-tokens "$(POLICY_PROMPT_TOKENS)" \
+		--log "$(POLICY_LOG)"
+	$(PYTHON) scripts/memory_pressure.py --dry-run --mb 64 --seconds 1

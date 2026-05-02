@@ -1,0 +1,36 @@
+profiles:
+  quality_first:
+    alpha_quality: 6.0
+    beta_latency: 1.0
+    gamma_memory: 1.5
+    delta_swap_risk: 2.0
+    epsilon_bandwidth_pressure: 2.0
+  conservative:
+    alpha_quality: 6.0
+    beta_latency: 1.0
+    gamma_memory: 1.5
+    delta_swap_risk: 2.0
+    epsilon_bandwidth_pressure: 2.0
+  balanced:
+    alpha_quality: 4.0
+    beta_latency: 1.0
+    gamma_memory: 2.0
+    delta_swap_risk: 3.0
+    epsilon_bandwidth_pressure: 3.0
+  memory_first:
+    alpha_quality: 2.0
+    beta_latency: 1.0
+    gamma_memory: 4.0
+    delta_swap_risk: 5.0
+    epsilon_bandwidth_pressure: 4.0
+  stress:
+    alpha_quality: 1.0
+    beta_latency: 1.0
+    gamma_memory: 6.0
+    delta_swap_risk: 6.0
+    epsilon_bandwidth_pressure: 5.0
+
+auto_mapping:
+  under_saturated: balanced
+  saturation: memory_first
+  contention: stress

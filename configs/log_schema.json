@@ -201,6 +201,52 @@
     },
     "swapout_delta": {
       "type": "number"
+    },
+    "operating_regime_target": {
+      "type": "string",
+      "enum": ["under_saturated", "saturation", "contention", "unknown"]
+    },
+    "operating_regime_observed": {
+      "type": "string",
+      "enum": ["under_saturated", "saturation", "contention", "unknown"]
+    },
+    "pressure_injection": {
+      "type": "string"
+    },
+    "selected_action": {
+      "type": ["string", "null"]
+    },
+    "retention_ratio": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "kv_bits": {
+      "type": ["integer", "null"],
+      "minimum": 1
+    },
+    "estimated_full_kv_mb": {
+      "type": "number",
+      "minimum": 0
+    },
+    "estimated_kv_cache_mb": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "memory_budget_mb": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "backend_status": {
+      "type": ["string", "null"],
+      "enum": ["real", "simulated", "infeasible", null]
+    },
+    "policy_costs": {
+      "type": ["array", "null"]
+    },
+    "latency_p95_ms_per_token": {
+      "type": "number",
+      "minimum": 0
     }
   }
 }

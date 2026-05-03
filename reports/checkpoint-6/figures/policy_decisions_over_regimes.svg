@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="136" viewBox="0 0 960 136">
+  <rect width="100%" height="100%" fill="white" />
+  <text x="480.0" y="28" text-anchor="middle" font-size="18">Adaptive Policy Decisions over Regimes</text>
+  <text x="24" y="58" font-size="13">under_saturated -> full_8 | memory saved 46.9% | delta score 0.000</text>
+<text x="24" y="84" font-size="13">saturation -> dynamic_r514_b16 | memory saved 48.6% | delta score 0.318</text>
+<text x="24" y="110" font-size="13">contention -> dynamic_r514_b16 | memory saved 48.6% | delta score 0.318</text>
+</svg>

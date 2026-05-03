@@ -1,0 +1,32 @@
+experiment:
+  name: needle_minimal
+  model: models/Llama-3.2-1B-4bit
+  backend: mlx
+  quantization: 4bit_model
+
+benchmark:
+  prompt_tokens: [3072, 10000]
+  positions: [sink, early, middle, late, very_late]
+  repeats: 3
+  max_tokens: 24
+
+actions:
+  - full_16
+  - full_8
+  - r75_b16
+  - r50_b16
+  - r30_b16
+  - r75_b8
+  - r50_b8
+  - r30_b4
+
+retention:
+  protected_window_tokens: 4
+
+outputs:
+  log: logs/benchmarks/needle_minimal_latest.jsonl
+  results_csv: reports/checkpoint-6/needle_minimal_results.csv
+  summary_csv: reports/checkpoint-6/needle_retrieval_summary.csv
+  curve_svg: reports/checkpoint-6/figures/retrieval_vs_retention.svg
+  failure_map_svg: reports/checkpoint-6/figures/needle_failure_map.svg
+  report: reports/checkpoint-6/report_needle_minimal.md

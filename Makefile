@@ -28,8 +28,10 @@ POLICY_PROMPT_TOKENS ?= 3072,10000
 POLICY_MAX_TOKENS ?= 32
 ADAPTIVE_OS_DIR ?= logs/adaptive_os
 CHECKPOINT5_CONFIG ?= configs/experiments/checkpoint5_runtime_os.yaml
+CHECKPOINT6_CONFIG ?= configs/benchmarks/checkpoint6_regime_benchmark.yaml
+NEEDLE_CONFIG ?= configs/benchmarks/needle_minimal.yaml
 
-.PHONY: help checkpoint1 checkpoint1-prepare checkpoint1-deps checkpoint1-dirs checkpoint1-preflight checkpoint1-baseline checkpoint1-report checkpoint1-check checkpoint2 checkpoint2-prepare checkpoint2-deps checkpoint2-dirs checkpoint2-extract checkpoint2-analyze checkpoint2-check checkpoint3 checkpoint3-dirs checkpoint3-compare checkpoint3-check checkpoint4 checkpoint4-dirs checkpoint4-controller checkpoint4-check checkpoint5 checkpoint5-dirs checkpoint5-runtime checkpoint5-check telemetry-check
+.PHONY: help checkpoint1 checkpoint1-prepare checkpoint1-deps checkpoint1-dirs checkpoint1-preflight checkpoint1-baseline checkpoint1-report checkpoint1-check checkpoint2 checkpoint2-prepare checkpoint2-deps checkpoint2-dirs checkpoint2-extract checkpoint2-analyze checkpoint2-check checkpoint3 checkpoint3-dirs checkpoint3-compare checkpoint3-check checkpoint4 checkpoint4-dirs checkpoint4-controller checkpoint4-check checkpoint5 checkpoint5-dirs checkpoint5-runtime checkpoint5-check checkpoint6 checkpoint6-dirs checkpoint6-benchmark checkpoint6-check needle-minimal needle-minimal-check telemetry-check
 
 help:
 	@echo "Lumina checkpoint automation"
@@ -48,6 +50,10 @@ help:
 	@echo "  make checkpoint4-check    Validate Checkpoint 4 without loading a model"
 	@echo "  make checkpoint5          Run Adaptive Memory OS runtime integration"
 	@echo "  make checkpoint5-check    Validate Checkpoint 5 without loading a model"
+	@echo "  make checkpoint6          Run regime-aware benchmark proof"
+	@echo "  make checkpoint6-check    Validate Checkpoint 6 without loading a model"
+	@echo "  make needle-minimal       Run minimal Needle retention benchmark"
+	@echo "  make needle-minimal-check Validate Needle benchmark without loading a model"
 	@echo ""
 	@echo "Config:"
 	@echo "  MODEL=$(MODEL)"
@@ -58,6 +64,8 @@ help:
 	@echo "  COMPRESSION_MAX_TOKENS=$(COMPRESSION_MAX_TOKENS)"
 	@echo "  POLICY_PROMPT_TOKENS=$(POLICY_PROMPT_TOKENS)"
 	@echo "  CHECKPOINT5_CONFIG=$(CHECKPOINT5_CONFIG)"
+	@echo "  CHECKPOINT6_CONFIG=$(CHECKPOINT6_CONFIG)"
+	@echo "  NEEDLE_CONFIG=$(NEEDLE_CONFIG)"
 
 checkpoint1: checkpoint1-prepare checkpoint1-preflight checkpoint1-baseline checkpoint1-report
 	@echo "Checkpoint 1 complete. Report: reports/baseline_report.md"
@@ -235,3 +243,34 @@ checkpoint5-check: .venv/bin/python checkpoint5-dirs
 		src/lumina/policy/cost.py \
 		src/lumina/policy/controller.py
 	$(PYTHON) scripts/run_lumina.py --dry-run --config "$(CHECKPOINT5_CONFIG)"
+
+checkpoint6: checkpoint6-dirs checkpoint6-benchmark
+	@echo "Checkpoint 6 benchmark report: reports/report-checkpoint-6.md"
+
+checkpoint6-dirs:
+	@mkdir -p logs/benchmarks reports/checkpoint-6/figures configs/benchmarks
+
+checkpoint6-benchmark:
+	$(PYTHON) scripts/run_benchmarks.py --config "$(CHECKPOINT6_CONFIG)"
+
+checkpoint6-check: .venv/bin/python checkpoint6-dirs
+	$(PYTHON) -m py_compile \
+		scripts/run_benchmarks.py \
+		scripts/run_needle_benchmark.py \
+		scripts/demo_lumina.py \
+		scripts/run_lumina.py \
+		scripts/run_policy_experiment.py \
+		src/lumina/policy/__init__.py \
+		src/lumina/policy/actions.py \
+		src/lumina/policy/regimes.py \
+		src/lumina/policy/cost.py \
+		src/lumina/policy/controller.py
+	$(PYTHON) scripts/run_benchmarks.py --dry-run --config "$(CHECKPOINT6_CONFIG)"
+
+needle-minimal: checkpoint6-dirs
+	$(PYTHON) scripts/run_needle_benchmark.py --config "$(NEEDLE_CONFIG)"
+	@echo "Needle report: reports/checkpoint-6/report_needle_minimal.md"
+
+needle-minimal-check: .venv/bin/python checkpoint6-dirs
+	$(PYTHON) -m py_compile scripts/run_needle_benchmark.py
+	$(PYTHON) scripts/run_needle_benchmark.py --dry-run --config "$(NEEDLE_CONFIG)"

@@ -1,3 +1,0 @@
-run_id,target_regime,prompt_tokens,action_name,feasible,backend_status,reason,estimated_kv_cache_mb,memory_budget_mb,quality_loss,latency,memory_usage,swap_risk,bandwidth_pressure,total
-checkpoint5-under_saturated-3072-20260502224517,under_saturated,3072,full_16,True,real,fp16/bf16 KV path available,96.0,352.0,0.0,1.0,0.272727,0.0,0.010909,1.578182
-checkpoint5-under_saturated-3072-20260502224517,under_saturated,3072,full_8,True,real,backend path available,50.976,352.0,0.0,1.02,0.144818,0.0,0.005793,1.327015

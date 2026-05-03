@@ -1,5 +1,0 @@
-method,runs,avg_kv_cache_mb,avg_ram_savings_percent,avg_quality_error,avg_latency_ms_per_token,avg_latency_overhead_percent,avg_tokens_per_second,worst_memory_pressure,verdict
-full,3,58.666666666666664,0.0,0.0,50.394000000000005,0.0,24.229,green,Baseline
-eviction,3,28.25,27.46680402930403,0.4740333333333333,50.29266666666666,-3.0311847313571096,26.200333333333333,green,Qualita' debole
-pca_35,3,30.239666666666665,48.47081043956044,0.891,64.00433333333334,20.960893107804043,21.666,yellow,Qualita' debole
-quantized_8bit,3,31.166666666666668,46.875,0.0,50.552,-1.7855362423110221,25.236333333333334,green,Ottimo

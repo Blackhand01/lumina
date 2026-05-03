@@ -1,4 +1,0 @@
-regime,selected_action,reason,quality_delta,memory_delta_percent,swap_pageout_delta
-under_saturated,full_8,backend path available,0.0,46.9,0.0
-saturation,dynamic_r514_b16,fp16/bf16 KV path available,0.318334,48.551,72.927
-contention,dynamic_r514_b16,fp16/bf16 KV path available,0.318334,48.551,175.824

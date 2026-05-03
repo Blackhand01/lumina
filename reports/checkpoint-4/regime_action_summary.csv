@@ -1,7 +1,0 @@
-run_id,target_regime,observed_regime,prompt_tokens,budget_mb,full_kv_mb,selected_action,backend_status,estimated_kv_mb,score,reason
-checkpoint4-under_saturated-3072-20260502214114,under_saturated,under_saturated,3072,352.0,96.0,full_8,real,50.976,1.327015,backend path available
-checkpoint4-saturation-3072-20260502214114,saturation,saturation,3072,49.44,96.0,r50_b16,real,48.0,15.825717,fp16/bf16 KV path available
-checkpoint4-contention-3072-20260502214114,contention,contention,3072,49.44,96.0,r50_b16,real,48.0,26.787169,fp16/bf16 KV path available
-checkpoint4-under_saturated-10000-20260502214114,under_saturated,under_saturated,10000,625.0,312.5,full_8,real,165.938,1.58286,backend path available
-checkpoint4-saturation-10000-20260502214114,saturation,saturation,10000,160.938,312.5,r50_b16,real,156.25,15.825717,fp16/bf16 KV path available
-checkpoint4-contention-10000-20260502214114,contention,contention,10000,160.938,312.5,r50_b16,real,156.25,26.787169,fp16/bf16 KV path available

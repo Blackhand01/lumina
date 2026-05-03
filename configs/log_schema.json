@@ -225,6 +225,12 @@
       "type": ["integer", "null"],
       "minimum": 1
     },
+    "dynamic_retention_enabled": {
+      "type": "boolean"
+    },
+    "is_dynamic_action": {
+      "type": "boolean"
+    },
     "estimated_full_kv_mb": {
       "type": "number",
       "minimum": 0
@@ -247,6 +253,28 @@
     "latency_p95_ms_per_token": {
       "type": "number",
       "minimum": 0
+    },
+    "decision_time_ms": {
+      "type": "number",
+      "minimum": 0
+    },
+    "decision_overhead_fraction": {
+      "type": "number",
+      "minimum": 0
+    },
+    "decision_overhead_ok": {
+      "type": "boolean"
+    },
+    "budget_violation": {
+      "type": "boolean"
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": ["controller", "mlx", "simulated"]
+    },
+    "step_index": {
+      "type": "integer",
+      "minimum": 1
     }
   }
 }

@@ -41,6 +41,28 @@ DEFAULT_ACTION_GRID: tuple[HybridKVAction, ...] = (
 )
 
 
+def make_dynamic_retention_action(
+    *,
+    retention: float,
+    kv_bits: int,
+    name_prefix: str = "dynamic",
+) -> HybridKVAction:
+    """Create a budget-derived retention action.
+
+    Dynamic action names use retention in permille so that r=0.970 becomes
+    dynamic_r970_b8 and r=0.515 becomes dynamic_r515_b16.
+    """
+
+    clipped = min(max(retention, 0.001), 1.0)
+    retention_permille = int(round(clipped * 1000))
+    return HybridKVAction(
+        name=f"{name_prefix}_r{retention_permille:03d}_b{kv_bits}",
+        retention=clipped,
+        kv_bits=kv_bits,
+        description="Budget-driven retention action.",
+    )
+
+
 @dataclass(frozen=True)
 class BackendSupport:
     """Backend feasibility declaration for action filtering."""
@@ -82,4 +104,3 @@ def backend_feasibility(action: HybridKVAction, support: BackendSupport) -> Back
 
 def actions_by_name(actions: Iterable[HybridKVAction] = DEFAULT_ACTION_GRID) -> dict[str, HybridKVAction]:
     return {action.name: action for action in actions}
-

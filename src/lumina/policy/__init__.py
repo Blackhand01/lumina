@@ -7,6 +7,7 @@ from .actions import (
     HybridKVAction,
     actions_by_name,
     backend_feasibility,
+    make_dynamic_retention_action,
 )
 from .controller import HybridPolicyController, PolicyDecision
 from .cost import CostBreakdown, CostWeights, ModelKVProfile, WEIGHT_PROFILES
@@ -19,6 +20,7 @@ __all__ = [
     "HybridKVAction",
     "actions_by_name",
     "backend_feasibility",
+    "make_dynamic_retention_action",
     "HybridPolicyController",
     "PolicyDecision",
     "CostBreakdown",
@@ -28,4 +30,3 @@ __all__ = [
     "PolicyState",
     "classify_operating_regime",
 ]
-

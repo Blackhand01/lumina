@@ -95,13 +95,18 @@ def estimate_action_kv_mb(action: HybridKVAction, full_kv_mb: float) -> float:
     """Estimate action KV memory from full FP16 KV size."""
 
     precision_ratio = action.kv_bits / 16
-    metadata_multiplier = 1.0
+    metadata_multiplier = precision_memory_multiplier(action.kv_bits)
     metadata_overhead_mb = 0.0
-    if action.kv_bits < 16:
-        # Checkpoint 3 observed q8 at about 53.1% of full KV, not exact 50%.
-        metadata_multiplier = 1.062
-        metadata_overhead_mb = 0.0
     return full_kv_mb * action.retention * precision_ratio * metadata_multiplier + metadata_overhead_mb
+
+
+def precision_memory_multiplier(kv_bits: int) -> float:
+    """Return empirical cache overhead multiplier for a KV precision."""
+
+    if kv_bits < 16:
+        # Checkpoint 3 observed q8 at about 53.1% of full KV, not exact 50%.
+        return 1.062
+    return 1.0
 
 
 def quality_loss_prior(action: HybridKVAction, state: PolicyState) -> float:
@@ -110,12 +115,14 @@ def quality_loss_prior(action: HybridKVAction, state: PolicyState) -> float:
 
     retention_loss = 0.0
     if action.retention < 1.0:
-        if action.retention >= 0.75:
-            retention_loss = 0.12
-        elif action.retention >= 0.50:
-            retention_loss = 0.35
+        r = action.retention
+        if r >= 0.75:
+            retention_loss = 0.12 * ((1.0 - r) / 0.25)
+        elif r >= 0.50:
+            retention_loss = 0.12 + (0.35 - 0.12) * ((0.75 - r) / 0.25)
         else:
-            retention_loss = 0.65
+            retention_loss = 0.35 + (0.65 - 0.35) * ((0.50 - r) / 0.20)
+        retention_loss = min(max(retention_loss, 0.0), 1.0)
 
     precision_loss = 0.0
     if action.kv_bits < 8:

@@ -26,8 +26,10 @@ POLICY_DIR ?= logs/policy
 POLICY_LOG ?= $(POLICY_DIR)/policy_$(shell date +%Y%m%d_%H%M%S).jsonl
 POLICY_PROMPT_TOKENS ?= 3072,10000
 POLICY_MAX_TOKENS ?= 32
+ADAPTIVE_OS_DIR ?= logs/adaptive_os
+CHECKPOINT5_CONFIG ?= configs/experiments/checkpoint5_runtime_os.yaml
 
-.PHONY: help checkpoint1 checkpoint1-prepare checkpoint1-deps checkpoint1-dirs checkpoint1-preflight checkpoint1-baseline checkpoint1-report checkpoint1-check checkpoint2 checkpoint2-prepare checkpoint2-deps checkpoint2-dirs checkpoint2-extract checkpoint2-analyze checkpoint2-check checkpoint3 checkpoint3-dirs checkpoint3-compare checkpoint3-check checkpoint4 checkpoint4-dirs checkpoint4-controller checkpoint4-check telemetry-check
+.PHONY: help checkpoint1 checkpoint1-prepare checkpoint1-deps checkpoint1-dirs checkpoint1-preflight checkpoint1-baseline checkpoint1-report checkpoint1-check checkpoint2 checkpoint2-prepare checkpoint2-deps checkpoint2-dirs checkpoint2-extract checkpoint2-analyze checkpoint2-check checkpoint3 checkpoint3-dirs checkpoint3-compare checkpoint3-check checkpoint4 checkpoint4-dirs checkpoint4-controller checkpoint4-check checkpoint5 checkpoint5-dirs checkpoint5-runtime checkpoint5-check telemetry-check
 
 help:
 	@echo "Lumina checkpoint automation"
@@ -44,6 +46,8 @@ help:
 	@echo "  make checkpoint3-check    Validate Checkpoint 3 without loading a model"
 	@echo "  make checkpoint4          Run regime-aware policy controller and write report"
 	@echo "  make checkpoint4-check    Validate Checkpoint 4 without loading a model"
+	@echo "  make checkpoint5          Run Adaptive Memory OS runtime integration"
+	@echo "  make checkpoint5-check    Validate Checkpoint 5 without loading a model"
 	@echo ""
 	@echo "Config:"
 	@echo "  MODEL=$(MODEL)"
@@ -53,6 +57,7 @@ help:
 	@echo "  PROMPT_TOKENS=$(PROMPT_TOKENS)"
 	@echo "  COMPRESSION_MAX_TOKENS=$(COMPRESSION_MAX_TOKENS)"
 	@echo "  POLICY_PROMPT_TOKENS=$(POLICY_PROMPT_TOKENS)"
+	@echo "  CHECKPOINT5_CONFIG=$(CHECKPOINT5_CONFIG)"
 
 checkpoint1: checkpoint1-prepare checkpoint1-preflight checkpoint1-baseline checkpoint1-report
 	@echo "Checkpoint 1 complete. Report: reports/baseline_report.md"
@@ -210,3 +215,23 @@ checkpoint4-check: .venv/bin/python checkpoint4-dirs
 		--prompt-tokens "$(POLICY_PROMPT_TOKENS)" \
 		--log "$(POLICY_LOG)"
 	$(PYTHON) scripts/memory_pressure.py --dry-run --mb 64 --seconds 1
+
+checkpoint5: checkpoint5-dirs checkpoint5-runtime
+	@echo "Checkpoint 5 runtime report: reports/report-checkpoint-5.md"
+
+checkpoint5-dirs:
+	@mkdir -p $(ADAPTIVE_OS_DIR) reports/checkpoint-5 configs/experiments
+
+checkpoint5-runtime:
+	$(PYTHON) scripts/run_lumina.py --config "$(CHECKPOINT5_CONFIG)"
+
+checkpoint5-check: .venv/bin/python checkpoint5-dirs
+	$(PYTHON) -m py_compile \
+		scripts/run_lumina.py \
+		scripts/run_policy_experiment.py \
+		src/lumina/policy/__init__.py \
+		src/lumina/policy/actions.py \
+		src/lumina/policy/regimes.py \
+		src/lumina/policy/cost.py \
+		src/lumina/policy/controller.py
+	$(PYTHON) scripts/run_lumina.py --dry-run --config "$(CHECKPOINT5_CONFIG)"

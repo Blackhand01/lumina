@@ -1,0 +1,7 @@
+run_id,step_index,target_regime,observed_regime,prompt_tokens,selected_action,retention_ratio,kv_bits,backend_status,estimated_kv_cache_mb,memory_budget_mb,budget_violation,decision_time_ms,decision_overhead_fraction,score,execution_mode
+checkpoint5-under_saturated-3072-20260502224517,1,under_saturated,under_saturated,3072,full_8,1.0,8,real,50.976,352.0,False,0.2081,0.004144,1.327015,controller
+checkpoint5-saturation-3072-20260502224517,2,saturation,saturation,3072,dynamic_r514_b16,0.514485,16,real,49.391,49.44,False,0.1062,0.001927,16.54528,controller
+checkpoint5-contention-3072-20260502224517,3,contention,contention,3072,dynamic_r514_b16,0.514485,16,real,49.391,49.44,False,0.1319,0.002269,27.880632,controller
+checkpoint5-under_saturated-10000-20260502224517,4,under_saturated,under_saturated,10000,full_8,1.0,8,real,165.938,625.0,False,0.0708,0.001414,1.58286,controller
+checkpoint5-saturation-10000-20260502224517,5,saturation,saturation,10000,dynamic_r514_b16,0.5144850000000001,16,real,160.777,160.938,False,0.092,0.001671,16.54528,controller
+checkpoint5-contention-10000-20260502224517,6,contention,contention,10000,dynamic_r514_b16,0.5144850000000001,16,real,160.777,160.938,False,0.1499,0.002577,27.880632,controller

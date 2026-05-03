@@ -1,0 +1,73 @@
+experiment:
+  name: checkpoint5_runtime_os
+  model: models/Llama-3.2-1B-4bit
+  backend: mlx
+  quantization: 4bit_model
+
+scenario:
+  name: prompt_growth_runtime_os
+  task_profile: document_qa
+  prompt_tokens: [3072, 10000]
+  regimes: [under_saturated, saturation, contention]
+
+generation:
+  max_tokens: 1
+  run_mlx: false
+
+policy:
+  profile: auto
+  allow_simulated: false
+  max_decision_overhead_fraction: 0.05
+  dynamic_retention:
+    enabled: true
+    kv_bits: [8, 16]
+    min_retention: 0.30
+    budget_margin: 0.999
+    replace_static_retention: true
+
+memory:
+  budget_ratio:
+    under_saturated: 2.0
+    saturation: 0.515
+    contention: 0.515
+  min_under_saturated_headroom_mb: 256
+
+regime_priors:
+  under_saturated:
+    memory_pressure: green
+    pressure_injection: none
+    swap_delta_mb: 0
+    pageout_delta: 0
+    swapout_delta: 0
+    compressed_memory_delta_mb: 0
+    latency_ms_per_token: 50
+    latency_p95_ms_per_token: 52
+    recent_latency_trend: 0
+  saturation:
+    memory_pressure: yellow
+    pressure_injection: budget_only
+    swap_delta_mb: 48
+    pageout_delta: 25
+    swapout_delta: 0
+    compressed_memory_delta_mb: 128
+    latency_ms_per_token: 55
+    latency_p95_ms_per_token: 72
+    recent_latency_trend: 0.12
+  contention:
+    memory_pressure: yellow
+    pressure_injection: memory_process
+    swap_delta_mb: 96
+    pageout_delta: 80
+    swapout_delta: 12
+    compressed_memory_delta_mb: 320
+    latency_ms_per_token: 58
+    latency_p95_ms_per_token: 110
+    recent_latency_trend: 0.35
+
+outputs:
+  log: logs/adaptive_os/runtime_os_latest.jsonl
+  runtime_csv: reports/checkpoint-5/runtime_decisions.csv
+  budget_csv: reports/checkpoint-5/budget_enforcement.csv
+  cost_csv: reports/checkpoint-5/runtime_cost_terms.csv
+  action_svg: reports/checkpoint-5/runtime_policy_actions.svg
+  report: reports/report-checkpoint-5.md

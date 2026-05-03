@@ -1,0 +1,2 @@
+run_id,target_regime,prompt_tokens,selected_action,retention_ratio,kv_bits,estimated_kv_cache_mb,memory_budget_mb,budget_violation,backend_status,reason
+checkpoint5-under_saturated-3072-20260502224517,under_saturated,3072,full_8,1.0,8,50.976,352.0,False,real,backend path available
